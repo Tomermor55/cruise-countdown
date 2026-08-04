@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#073b68" />
+  <title>הספירה לאחור לקרוז</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      min-height: 100vh;
+      font-family: Arial, "Segoe UI", sans-serif;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background:
+        linear-gradient(rgba(1, 24, 55, .58), rgba(1, 22, 48, .82)),
+        url("https://images.unsplash.com/photo-1548574505-5e239809ee19?auto=format&fit=crop&w=1800&q=85")
+        center/cover fixed no-repeat;
+    }
+
+    .card {
+      width: min(980px, 100%);
+      padding: 34px 24px;
+      text-align: center;
+      border-radius: 28px;
+      background: rgba(4, 37, 73, .72);
+      border: 1px solid rgba(255,255,255,.22);
+      box-shadow: 0 22px 70px rgba(0,0,0,.42);
+      backdrop-filter: blur(8px);
+    }
+
+    .badge {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 9px 18px;
+      border-radius: 999px;
+      background: #ff4d97;
+      font-weight: 900;
+      letter-spacing: .3px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(42px, 8vw, 88px);
+      line-height: 1;
+      text-shadow: 0 5px 18px rgba(0,0,0,.32);
+    }
+
+    h1 span { color: #ffb703; }
+
+    .date {
+      margin: 16px 0 30px;
+      font-size: clamp(22px, 3vw, 34px);
+      font-weight: 800;
+    }
+
+    .countdown {
+      direction: ltr;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .unit {
+      padding: 24px 10px 18px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.13);
+      border: 1px solid rgba(255,255,255,.22);
+      box-shadow: inset 0 1px rgba(255,255,255,.2), 0 10px 26px rgba(0,0,0,.18);
+    }
+
+    .number {
+      display: block;
+      font-size: clamp(42px, 7vw, 80px);
+      line-height: 1;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .label {
+      direction: rtl;
+      display: block;
+      margin-top: 10px;
+      font-size: clamp(16px, 2vw, 22px);
+      font-weight: 800;
+    }
+
+    .deposit {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 12px 20px;
+      border-radius: 18px;
+      background: #fff;
+      color: #073b68;
+      font-size: clamp(18px, 2.5vw, 25px);
+      font-weight: 900;
+    }
+
+    .deposit strong { color: #0aa05a; }
+
+    .secret {
+      margin-top: 16px;
+      color: #ffe066;
+      font-size: clamp(17px, 2.4vw, 24px);
+      font-weight: 900;
+    }
+
+    .status {
+      margin-top: 18px;
+      font-size: clamp(18px, 2.5vw, 28px);
+      font-weight: 900;
+    }
+
+    @media (max-width: 720px) {
+      .card { padding: 28px 15px; }
+      .countdown { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="badge">🚢 CRUISE WITH FRIENDS</div>
+    <h1>הקרוז <span>מתקרב!</span></h1>
+    <div class="date">18.09.2027 בשעה 00:00</div>
+
+    <section class="countdown" aria-label="ספירה לאחור לקרוז">
+      <div class="unit"><span class="number" id="days">000</span><span class="label">ימים</span></div>
+      <div class="unit"><span class="number" id="hours">00</span><span class="label">שעות</span></div>
+      <div class="unit"><span class="number" id="minutes">00</span><span class="label">דקות</span></div>
+      <div class="unit"><span class="number" id="seconds">00</span><span class="label">שניות</span></div>
+    </section>
+
+    <div class="deposit">✅ כולם שילמו מקדמה של <strong>$500</strong></div>
+    <div class="status" id="status">עוד קצת וזה קורה...</div>
+    <div class="secret">🤫 אסור לדבר על זה עד שנוסעים!</div>
+  </main>
+
+  <script>
+    // 18.09.2027 בשעה 00:00 לפי שעון ישראל (UTC+03:00)
+    const targetTime = new Date("2027-09-18T00:00:00+03:00").getTime();
+
+    const daysEl = document.getElementById("days");
+    const hoursEl = document.getElementById("hours");
+    const minutesEl = document.getElementById("minutes");
+    const secondsEl = document.getElementById("seconds");
+    const statusEl = document.getElementById("status");
+
+    function pad(value, size = 2) {
+      return String(value).padStart(size, "0");
+    }
+
+    function updateCountdown() {
+      const now = Date.now();
+      const distance = targetTime - now;
+
+      if (distance <= 0) {
+        daysEl.textContent = "000";
+        hoursEl.textContent = "00";
+        minutesEl.textContent = "00";
+        secondsEl.textContent = "00";
+        statusEl.textContent = "🎉 זהו זה — יוצאים לקרוז!";
+        clearInterval(timer);
+        return;
+      }
+
+      const totalSeconds = Math.floor(distance / 1000);
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      daysEl.textContent = pad(days, 3);
+      hoursEl.textContent = pad(hours);
+      minutesEl.textContent = pad(minutes);
+      secondsEl.textContent = pad(seconds);
+    }
+
+    updateCountdown();
+    const timer = setInterval(updateCountdown, 1000);
+  </script>
+</body>
+</html>
